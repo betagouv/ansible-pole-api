@@ -1,0 +1,18 @@
+---
+- name: Set sysctl parameters for all interfaces on IPv6 and IPv4
+  sysctl:
+    name: "{{ item.1 }}.{{ item.0.key }}"
+    value: "{{ item.0.value }}"
+    reload: true
+  loop: "{{ sysctl_dualstack_ip_config|dict2items|product(['net.ipv4.conf.all', 'net.ipv4.conf.default', 'net.ipv6.conf.all', 'net.ipv6.conf.default']) }}"
+  loop_control:
+    label: "{{ item.1 }}.{{ item.0.key }} = {{ item.0.value }}"
+
+- name: Set sysctl parameters
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    reload: true
+  loop: "{{ sysctl_general_config | dict2items }}"
+  loop_control:
+    label: "{{ item.key }} = {{ item.value }}"

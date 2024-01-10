@@ -1,0 +1,14 @@
+---
+argument_specs:
+  main:
+    author:
+      - Aurélien Merel
+    options:
+      sysctl_dualstack_ip_config:
+        type: dict
+        required: true
+        description: 'Paramètres à configurer sous net.ipv{4,6}.conf.{all,default}'
+      sysctl_general_config: 
+        type: dict
+        required: true
+        description: Paramètres sysctl à configurer
