@@ -1,0 +1,14 @@
+---
+sysctl_dualstack_ip_config:
+  forwarding: '0'
+  accept_redirects: '0'
+  accept_source_route: '0'
+
+sysctl_general_config:
+  'net.ipv4.conf.all.send_redirects': '0'
+  'net.ipv4.conf.default.send_redirects': '0'
+  'net.ipv4.tcp_timestamps': '0'
+  'net.ipv4.ip_forward': '0'
+  'net.ipv4.icmp_echo_ignore_broadcasts': '1'
+  'net.ipv6.icmp.echo_ignore_multicast': '1'
+  'net.ipv4.tcp_syncookies': '1'
