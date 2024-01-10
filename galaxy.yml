@@ -1,0 +1,11 @@
+---
+namespace: betagouv
+name: common_base_roles
+version: 1.0.0
+readme: README.md
+authors:
+  - Aurélien Merel <aurelien.merel@beta.gouv.fr>
+description: your collection description
+license: WTFPL
+repository: https://github.com/betagouv/ansible-pole-api
+issues: https://github.com/betagouv/ansible-pole-api/issues
