@@ -5,7 +5,7 @@ version: 1.0.0
 readme: README.md
 authors:
   - Aurélien Merel <aurelien.merel@beta.gouv.fr>
-description: your collection description
+description: Some common base roles for beta.gouv.fr
 license: WTFPL
 repository: https://github.com/betagouv/ansible-pole-api
 issues: https://github.com/betagouv/ansible-pole-api/issues
