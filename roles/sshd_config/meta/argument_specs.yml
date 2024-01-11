@@ -9,3 +9,7 @@ argument_specs:
         type: dict
         required: true
         description: 'Clés et valeurs pour sshd_config'
+      sshd_service_name:
+        type: str
+        required: true
+        description: 'Nom du service ssh'
