@@ -1,0 +1,11 @@
+---
+argument_specs:
+  main:
+    author:
+      - Aurélien Merel
+    version_added: 1.1.0
+    options:
+      sshd_config:
+        type: dict
+        required: true
+        description: 'Clés et valeurs pour sshd_config'

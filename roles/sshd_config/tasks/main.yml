@@ -1,0 +1,14 @@
+---
+- name: OpenSSH server is configured in /etc/ssh/sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: '0644'
+    regexp: '^#?\s*{{ item.key }}\s+'
+    line: '{{ item.key }} {{ item.value }}'
+    validate: '/usr/sbin/sshd -T -f %s'
+  loop: '{{ sshd_config | dict2items }}'
+  loop_control:
+    label: "{{ item.key }} {{ item.value }}"
+  notify: sshd is reloaded
