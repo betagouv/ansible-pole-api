@@ -1,0 +1,82 @@
+---
+- name: Group for managed users exists
+  group:
+    name: "{{ managed_users_group }}"
+    state: present
+
+- name: Group's sudo access is as configured
+  community.general.sudoers:
+    name: ansible-managed-users-{{ managed_users_group }}
+    group: "{{ managed_users_group }}"
+    commands: ALL
+    runas: ALL
+    state: "{{ managed_users_can_sudo | ternary('present', 'absent') }}"
+    nopassword: "{{ managed_users_can_sudo_nopasswd }}"
+
+- name: Groups content is known
+  getent:
+    database: group
+    key: "{{ managed_users_group }}"
+  check_mode: no
+
+- set_fact:
+    _current_managed_users: "{{ getent_group[managed_users_group][2] | default('') | split (',') | difference(['']) }}"
+    _wanted_managed_users: "{{ managed_users | map(attribute='login') }}"
+- set_fact:
+    _unwanted_managed_users: "{{ _current_managed_users | difference(_wanted_managed_users) }}"
+
+- name: Managed users accounts exist
+  user:
+    name: "{{ item.login }}"
+    groups: "{{ [managed_users_group] + (item.additional_groups | default([])) }}"
+    append: false
+    home: "{{ item.home | default(managed_users_home_base_dir ~ '/' ~ item.login) }}"
+    shell: "{{ item.shell | default('/bin/sh') }}"
+    password: "{{ item.password_hash | default(omit) }}"
+    update_password: on_create
+    state: present
+  loop: "{{ managed_users }}"
+
+- name: SSH keys are exclusively present for managed users
+  authorized_key:
+    user: "{{ item.login }}"
+    key: "{{ item.authorized_keys | default('') }}"
+    exclusive: yes
+  loop: "{{ managed_users }}"
+
+- name: Managed users can read their home directory
+  file:
+    path: "{{ item.home | default(managed_users_home_base_dir ~ '/' ~ item.login) }}"
+    owner: "{{ item.login }}"
+    mode: "u+rX"
+    recurse: no
+  loop: "{{ managed_users }}"
+
+- name: Managed users can read their .ssh folder and its content
+  file:
+    path: "{{ item.home | default(managed_users_home_base_dir ~ '/' ~ item.login) }}/.ssh"
+    owner: "{{ item.login }}"
+    mode: "u+rX"
+    recurse: yes
+  loop: "{{ managed_users }}"
+  
+- name: Current logged in user for Ansible is known
+  command:
+    cmd: whoami
+  become: false
+  register: _managed_users_whoami_cmd
+
+- include_tasks: ansible_login_user_is_deleted.yml
+  when: _managed_users_whoami_cmd.stdout in _unwanted_managed_users
+
+- name: Fail if we are still about to remove the user we are logged in as
+  fail:
+    msg: "ERROR. User '{{ _managed_users_whoami_cmd.stdout }}' is still used by Ansible SSH connection but is due for deletion. Change your SSH or Ansible configuration and start again."
+  when: _managed_users_whoami_cmd2 is defined and _managed_users_whoami_cmd2.stdout in _unwanted_managed_users
+
+- name: Unwanted managed users do not exist on the system
+  user:
+    name: "{{ item }}"
+    state: absent
+    force: yes
+  loop: "{{ _unwanted_managed_users }}"
