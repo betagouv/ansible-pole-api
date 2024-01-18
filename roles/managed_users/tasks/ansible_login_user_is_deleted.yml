@@ -1,0 +1,18 @@
+---
+- name: Pause if we are about to remove the user we are logged in as
+  pause:
+    prompt: |
+      **** WARNING ****
+      User {{ _managed_users_whoami_cmd.stdout }} is about to be deleted but Ansible is using it. Change your configuration and continue. Valid users are now: {{ managed_users | map(attribute='login') | join (', ') }}.
+      Press [ENTER] once your have updated your configuration, or Ctrl-C to abort.
+      *****************
+  check_mode: no
+
+- name: Reset SSH connection before deleting user
+  meta: reset_connection
+
+- name: Current logged in user for Ansible is known
+  command:
+    cmd: whoami
+  become: false
+  register: _managed_users_whoami_cmd2

@@ -1,0 +1,26 @@
+---
+argument_specs:
+  main:
+    author:
+      - Aurélien Merel
+    version_added: 1.2.0
+    options:
+      managed_users_group:
+        type: str
+        description: 'Groupe dont les comptes système sont gérés par ce rôle'
+      managed_users:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Liste des comptes devant être dans le groupe.
+          - Les comptes présents sur le système mais non configurés dans cette liste seront supprimés.
+      managed_users_home_base_dir:
+        type: str
+        description: Répertoire de base sous lequel créer les répertoires personnels
+      managed_users_can_sudo:
+        type: bool
+        description: 'Le groupe doit-il être présent dans /etc/sudoers ?'
+      managed_users_can_sudo_nopasswd:
+        type: bool
+        description: 'Si le group a accès sudo, est-ce sans mot de passe ?'

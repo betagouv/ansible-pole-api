@@ -1,0 +1,5 @@
+---
+managed_users_group: sudo
+managed_users_can_sudo: true
+managed_users_can_sudo_nopasswd: false
+managed_users_home_base_dir: /home
