@@ -1,0 +1,10 @@
+[Interface]
+Address = {{ wireguard_if_ip }}
+PrivateKey = {{ wireguard_private_key }}
+ListenPort = {{ wireguard_listen_port }}
+
+{% for wgpeer in wireguard_peers %}
+[Peer] # {{ wgpeer.name }}
+PublicKey = {{ wgpeer.public_key }}
+AllowedIPs = {{ wgpeer.ip }}/32
+{% endfor %}
