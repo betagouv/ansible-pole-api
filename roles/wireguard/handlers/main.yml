@@ -1,0 +1,7 @@
+---
+- name: restart wg-quick
+  systemd_service:
+    name: "wg-quick@{{ wireguard_if }}.service"
+    state: restarted
+    enabled: yes
+    daemon_reload: yes

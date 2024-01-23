@@ -1,0 +1,5 @@
+---
+wireguard_listen_port: 39574
+wireguard_conf_dir: /etc/wireguard
+wireguard_if: wg0
+wireguard_if_ip: 172.16.1.1/24

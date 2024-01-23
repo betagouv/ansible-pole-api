@@ -1,0 +1,87 @@
+---
+- name: Wireguard APT package is installed
+  apt:
+    pkg: wireguard
+  tags:
+    - wireguard::package
+
+- name: Read Wireguard private key if it exists
+  slurp:
+    src: "{{ wireguard_conf_dir }}/{{ wireguard_if }}.privatekey"
+  ignore_errors: yes
+  register: _wg_slurp_privatekey
+  no_log: true
+  tags:
+    - wireguard::key
+    - wireguard::config
+
+- set_fact:
+    wireguard_private_key: "{{ wg_slurp_privatekey['content'] | b64decode | regex_replace('\\n$', '') }}"
+  no_log: true
+  when: not _wg_slurp_privatekey.failed
+  tags:
+    - wireguard::key
+    - wireguard::config
+
+- name: Wireguard private key is generated
+  command:
+    cmd: wg genkey
+  register: _wg_privkey_cmd
+  when: _wg_slurp_privatekey.failed
+  no_log: true
+  tags:
+    - wireguard::key
+    - wireguard::config
+
+- set_fact:
+    wireguard_private_key: "{{ wg_privkey_cmd.stdout }}"
+  when: _wg_slurp_privatekey.failed
+  no_log: true
+  tags:
+    - wireguard::key
+    - wireguard::config
+
+- name: Wireguard private key file exists
+  copy:
+    dest: "{{ wireguard_conf_dir }}/{{ wireguard_if }}.privatekey"
+    content: "{{ wireguard_private_key }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  register: _wg_write_privkey
+  no_log: true
+  tags:
+    - wireguard::key
+    - wireguard::config
+
+- name: Wireguard public key is known
+  shell:
+    cmd: wg pubkey
+    stdin: "{{ wireguard_private_key }}"
+  no_log: true
+  register: _wg_pubkey_cmd
+  changed_when: _wg_write_privkey.changed
+  tags:
+    - wireguard::key
+
+- set_fact:
+    wireguard_public_key: "{{ wg_pubkey_cmd.stdout }}"
+  tags:
+    - wireguard::key
+
+- debug:
+    msg: "Wireguard public key is: {{ wireguard_public_key }}"
+  tags:
+    - wireguard::key
+
+- name: Wireguard interface is configured
+  template:
+    src: wg-if.conf.j2
+    dest: /etc/wireguard/{{ wireguard_if }}.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify:
+    - restart wg-quick
+  tags:
+    - wireguard::config

@@ -1,0 +1,29 @@
+---
+argument_specs:
+  main:
+    author:
+      - Aurélien Merel
+    version_added: 1.3.0
+    short_description: Installation d'un serveur Wireguard et configuration de clients autorisés à s'y connecter.
+    options:
+      wireguard_listen_port:
+        type: int
+        description: "Port d'écoute UDP de Wireguard"
+      wireguard_conf_dir:
+        type: str
+        description: "Répertoire de stockage de la configuration de Wireguard"
+      wireguard_if:
+        type: str
+        description: "Nom de l'interface réseau créée par Wireguard"
+      wireguard_if_ip:
+        type: str
+        description: "Adresse IP et masque de sous-réseau du tunnel Wireguard"
+      wireguard_peers:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - "Liste des clients autorisés à se connecter. Chaque entrée contient trois paramètres."
+          - "C(name) : nom humain du client."
+          - "C(public_key) : clé publique Wireguard."
+          - "C(ip) : adresse IP attribuée à ce client, sans masque de sous-réseau, et devant être dans le réseau défini par C(wireguard_if_ip)."
