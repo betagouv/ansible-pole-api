@@ -27,3 +27,6 @@ argument_specs:
           - "C(name) : nom humain du client."
           - "C(public_key) : clé publique Wireguard."
           - "C(ip) : adresse IP attribuée à ce client, sans masque de sous-réseau, et devant être dans le réseau défini par C(wireguard_if_ip)."
+      wireguard_private_key:
+        type: str
+        description: "Clé privée de Wireguard. Si non spécifiée, une clé est générée au premier lancement. La clé publique sera affichée par la recette."
