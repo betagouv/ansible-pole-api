@@ -11,14 +11,15 @@
   ignore_errors: yes
   register: _wg_slurp_privatekey
   no_log: true
+  when: wireguard_private_key is not defined
   tags:
     - wireguard::key
     - wireguard::config
 
 - set_fact:
-    wireguard_private_key: "{{ wg_slurp_privatekey['content'] | b64decode | regex_replace('\\n$', '') }}"
+    wireguard_private_key: "{{ _wg_slurp_privatekey['content'] | b64decode | regex_replace('\\n$', '') }}"
   no_log: true
-  when: not _wg_slurp_privatekey.failed
+  when: wireguard_private_key is not defined and not _wg_slurp_privatekey.failed 
   tags:
     - wireguard::key
     - wireguard::config
@@ -27,15 +28,15 @@
   command:
     cmd: wg genkey
   register: _wg_privkey_cmd
-  when: _wg_slurp_privatekey.failed
+  when: wireguard_private_key is not defined and _wg_slurp_privatekey.failed
   no_log: true
   tags:
     - wireguard::key
     - wireguard::config
 
 - set_fact:
-    wireguard_private_key: "{{ wg_privkey_cmd.stdout }}"
-  when: _wg_slurp_privatekey.failed
+    wireguard_private_key: "{{ _wg_privkey_cmd.stdout }}"
+  when: wireguard_private_key is not defined and _wg_slurp_privatekey.failed
   no_log: true
   tags:
     - wireguard::key
@@ -65,7 +66,7 @@
     - wireguard::key
 
 - set_fact:
-    wireguard_public_key: "{{ wg_pubkey_cmd.stdout }}"
+    wireguard_public_key: "{{ _wg_pubkey_cmd.stdout }}"
   tags:
     - wireguard::key
 
