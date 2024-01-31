@@ -1,0 +1,10 @@
+---
+- block:
+    - include_tasks: 01_prepare_variables.yml
+    - include_tasks: 02_create_and_mount_encrypted_volumes.yml
+    - include_tasks: 03_prepare_bind_mounts.yml
+    - include_tasks: 04_cleanup_fstab.yml
+    - include_tasks: 05_generate_systemd_mount_units.yml
+    - include_tasks: 06_activate_bind_mounts.yml
+    - include_tasks: 07_lock_systemd_units_precedence.yml
+  when: encrypted_volumes is defined and encrypted_services_data is defined

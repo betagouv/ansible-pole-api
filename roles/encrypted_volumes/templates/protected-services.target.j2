@@ -1,0 +1,5 @@
+[Unit]
+Requires=mount-encrypted-binds.target
+{% for u in allunits -%}
+Requires={{ u }}
+{% endfor %}

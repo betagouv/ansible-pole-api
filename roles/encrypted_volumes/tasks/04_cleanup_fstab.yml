@@ -1,0 +1,27 @@
+---
+- name: slurp fstab
+  slurp:
+    path: /etc/fstab
+  register: fstab_b64
+
+- set_fact:
+    fstab_uuids: "{{ fstab_b64.content|b64decode|regex_findall('^UUID=([a-f0-9-]*)', '\\1', ignorecase=True) }}"
+
+- name: Search devices associated to UUIDs (errors are normal)
+  command:
+    cmd: "blkid --uuid {{ item }}"
+  loop: "{{ fstab_uuids }}"
+  register: uuid_search
+  changed_when: false
+  ignore_errors: yes
+
+- set_fact:
+    wrong_uuids: "{{ uuid_search.results|selectattr('rc', '!=', 0) }}"
+
+- name: Remove non-associated UUIDs from fstab
+  lineinfile:
+    path: /etc/fstab
+    regexp: "^UUID={{ item.item }}"
+    state: absent
+    backup: yes
+  loop: "{{ wrong_uuids }}"

@@ -1,0 +1,55 @@
+---
+# We prepare a few data structures based on the configuration variable
+# 'encrypted_services_data' to make our life easier in some loops later in the
+# role.
+#
+# The ones that matter are:
+#
+# allunits: flat list of all units, e.g. ['elasticsearch.service',
+# 'logstash.service']
+# 
+# alltargets: flat list of all target mount points, e.g.
+# ['/var/lib/elasticsearch/data', '/var/lib/elasticsearch/log',
+# '/var/log/logstash']
+#
+# allvolumes: flat list of all volumes (duplicates are not removed), e.g.
+# ['protected-data', 'protected-data', 'protected-data']
+# 
+# volumes_subdirs_targets: list of all volumes+subdirs and target mount point,
+# e.g. [ ['protected-data/elasticsearch/data', '/var/lib/elasticsearch/data'],
+#        ['protected-data/elasticsearch/log', '/var/lib/elasticsearch/log'],
+#        ['protected-data/logstash/log', '/var/log/logstash'] ]
+#
+# units_targets: list of dicts associating each unit with each of its targets,
+# e.g. [ {unit: elasticsearch.service, target: /var/lib/elasticsearch/data },
+#        {unit: elasticsearch.service, target: /var/lib/elasticsearch/log  },
+#        {unit: logstash.service, target: /var/log/logstash} ]
+
+- set_fact:
+    allunits: "{{ encrypted_services_data | json_query(jsq1) | unique }}"
+    alltargets: "{{ encrypted_services_data | json_query(jsq2) }}"
+    _units_targets: "{{ encrypted_services_data | json_query(jsq3) }}"
+    _volumes_subdirs: "{{ encrypted_services_data |json_query(jsq4) }}"
+    allvolumes: "{{ encrypted_services_data | json_query(jsq5) }}"
+  vars:
+    jsq1: '[[].unit, [].units[]][]'
+    jsq2: '[].[storage[*].binds[].target][][]'
+    jsq3: '[*].{units: [unit, units[]][], targets: storage[*].binds[*].target[]}'
+    jsq4: '[*].storage[*].{volume: volume, subdirs: binds[*].subdir}[]'
+    jsq5: '[*].storage[*].volume[]'
+
+- set_fact:
+    volumes_subdirs: "{{ volumes_subdirs|default([]) + [item.volume]|product(item.subdirs)|map('join', '/')|list }}"
+  loop: "{{ _volumes_subdirs }}"
+
+- set_fact:
+    volumes_subdirs_targets: "{{ volumes_subdirs | zip(alltargets) | list }}"
+
+- set_fact:
+    _ut: "{{ _ut|default([]) + (item.units|product(item.targets)|list) }}"
+  loop: "{{ _units_targets }}"
+
+- set_fact:
+    units_targets: "{{ _ut | json_query('[*].{unit: [0], target: [1]}') }}"
+
+
