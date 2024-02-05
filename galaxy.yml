@@ -1,7 +1,7 @@
 ---
 namespace: betagouv
 name: common_base_roles
-version: 1.3.0
+version: 1.4.0
 readme: README.md
 authors:
   - Aurélien Merel <aurelien.merel@beta.gouv.fr>
