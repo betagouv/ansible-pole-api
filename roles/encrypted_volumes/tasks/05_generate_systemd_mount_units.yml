@@ -1,0 +1,26 @@
+---
+- name: Find temporary mount, swap and service files in /tmp/
+  find:
+    path: /tmp/
+    patterns:
+      - "*.mount"
+      - "*.swap"
+      - "*.service"
+    recurse: no
+  register: findrslt
+
+- name: Delete temporary mount, swap and service files in /tmp/
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ findrslt.files }}"
+
+- name: Regenerate systemd-cryptsetup unit files
+  command:
+    cmd: /lib/systemd/system-generators/systemd-cryptsetup-generator
+
+- name: Regenerate mount unit files
+  systemd:
+    daemon_reload: yes
+    name: local-fs.target
+    state: restarted

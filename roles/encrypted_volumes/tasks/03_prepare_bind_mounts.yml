@@ -1,0 +1,24 @@
+---
+- name: Target directories of bind mounts exist
+  file:
+    path: "{{ item[1] }}"
+    state: directory
+  loop: "{{ volumes_subdirs_targets }}"
+
+- name: Bind mounts of services data directories are in fstab
+  mount:
+    src: "{{ encryped_volumes_base_dir }}/{{ item[0] }}"
+    path: "{{ item[1] }}"
+    opts: "bind,noauto,x-systemd.requires=/dev/mapper/{{ item[0].split('/')[0] }}"
+    state: present
+    fstype: none
+  loop: "{{ volumes_subdirs_targets }}"
+
+- name: Unit file to mount all bind-mounts is installed
+  template:
+    src: mount-encrypted-binds.target.j2
+    dest: /etc/systemd/system/mount-encrypted-binds.target
+    owner: root
+    group: root
+    mode: "0644"
+  notify: sd-reload

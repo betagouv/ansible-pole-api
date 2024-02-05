@@ -1,0 +1,63 @@
+---
+- name: Convert bind mount points to unit names
+  command:
+    cmd: "systemd-escape -p --suffix=mount {{ item.target }}"
+  register: bind_target_units
+  changed_when: false
+  loop: "{{ units_targets }}"
+
+- name: Convert encrypted volume names to systemd service names
+  command:
+    cmd: "systemd-escape -p --suffix=service {{ item }}"
+  register: escaped_volumes
+  changed_when: false
+  loop: "{{ allvolumes | unique }}"
+
+- set_fact:
+    units_mount_units: "{{ bind_target_units.results|json_query(jsq) }}"
+  vars:
+    jsq: '[].{unit: item.unit, mount_unit: stdout}'
+
+- set_fact:
+    all_sd_crypt_services: "{{ all_sd_crypt_services|default([]) + ['systemd-cryptsetup@' + item.stdout] }}"
+  loop: '{{ escaped_volumes.results }}'
+
+- name: Systemd directories in /etc/systemd/system exist for drop-in unit files
+  file:
+    path: "/etc/systemd/system/{{ item }}.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "755"
+  loop: "{{ allunits + all_sd_crypt_services }}"
+
+- name: Systemd drop-in to ensure SSH is started before decryption
+  copy:
+    src: unlock-after-ssh.conf
+    dest: "/etc/systemd/system/{{ item }}.d/unlock-after-ssh.conf"
+    owner: root
+    group: root
+    mode: "644"
+  loop: "{{ all_sd_crypt_services }}"
+  notify: sd-reload
+
+- name: Systemd drop-ins to block services until encrypted volumes are unlocked
+  template:
+    src: sd-unit-patch.j2
+    dest: "/etc/systemd/system/{{ item }}.d/encrypted-mounts.conf"
+    owner: root
+    group: root
+    mode: "644"
+  loop: "{{ allunits }}"
+  vars:
+    required_mount_units: "{{ units_mount_units|selectattr('unit', 'equalto', item) | list | json_query('[].mount_unit') }}"
+  notify: sd-reload
+
+- name: Unit file to start all protected services
+  template:
+    src: protected-services.target.j2
+    dest: "/etc/systemd/system/protected-services.target"
+    owner: root
+    group: root
+    mode: "644"
+  notify: sd-reload

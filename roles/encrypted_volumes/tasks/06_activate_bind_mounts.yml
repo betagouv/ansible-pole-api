@@ -1,0 +1,17 @@
+---
+- name: Force handlers to run if necessary (to reload systemd units)
+  meta: flush_handlers
+
+- name: Bind mounts of services data directories are mounted
+  mount:
+    src: "{{ encryped_volumes_base_dir }}/{{ item[0] }}"
+    path: "{{ item[1] }}"
+    opts: "bind,noauto,x-systemd.requires=/dev/mapper/{{ item[0].split('/')[0] }}"
+    state: mounted
+    fstype: none
+  loop: "{{ volumes_subdirs_targets }}"
+
+- name: Bind mounts also active via systemd
+  systemd:
+    name: mount-encrypted-binds.target
+    state: started

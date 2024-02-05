@@ -1,0 +1,4 @@
+---
+- name: sd-reload
+  systemd:
+    daemon_reload: yes

@@ -1,0 +1,64 @@
+---
+- name: Mountpoints of encrypted volumes exist
+  file:
+    path: "{{ encryped_volumes_base_dir }}/{{ item.name }}"
+    state: directory
+    mode: "755"
+    owner: root
+    group: root
+  loop: "{{ encrypted_volumes }}"
+
+- name: Encrypted block devices are not in /etc/fstab (they need decryption, not mount)
+  lineinfile:
+    path: /etc/fstab
+    regex: "^{{ item.device }}\\s"
+    state: absent
+  loop: "{{ encrypted_volumes }}"
+
+- name: Future LUKS partition is not mounted
+  command:
+    cmd: "umount {{ item.device }}"
+  loop: "{{ encrypted_volumes }}"
+  no_log: true
+  ignore_errors: yes
+
+- name: LUKS container exists and is open
+  community.crypto.luks_device:
+    device: "{{ item.device }}"
+    state: "opened"
+    name: "{{ item.name }}"
+    passphrase: "{{ item.passphrase }}"
+  loop: "{{ encrypted_volumes }}"
+  no_log: true
+
+- name: Encrypted block devices are in /etc/crypttab
+  crypttab:
+    backing_device: "{{ item.device }}"
+    name: "{{ item.name }}"
+    state: present
+    opts: "luks,noauto,x-systemd.device-timeout=30,timeout=30"
+  loop: "{{ encrypted_volumes }}"
+  no_log: true
+
+- name: ext4 filesystem inside LUKS container
+  filesystem:
+    fstype: ext4
+    dev: "/dev/mapper/{{ item.name }}"
+  loop: "{{ encrypted_volumes }}"
+  no_log: true
+
+- name: Encrypted volumes are mounted (from /dev/mapper/)
+  mount:
+    src: "/dev/mapper/{{ item.name }}"
+    path: "{{ encryped_volumes_base_dir }}/{{ item.name }}"
+    state: mounted
+    fstype: ext4
+    opts: noauto
+  loop: "{{ encrypted_volumes }}"
+  no_log: true
+
+- name: Services data subdirectories exist in mounted encrypted filesystems
+  file:
+    path: "{{ encryped_volumes_base_dir }}/{{ item }}"
+    state: directory
+  loop: "{{ volumes_subdirs }}"
