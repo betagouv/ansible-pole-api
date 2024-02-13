@@ -1,0 +1,36 @@
+---
+- name: unattended-upgrades package is installed
+  apt:
+    pkg: unattended-upgrades
+
+- name: APT auto-upgrade settings are configured
+  copy:
+    src: "20auto-upgrades"
+    dest: "/etc/apt/apt.conf.d/20auto-upgrades"
+    mode: "0644"
+
+- name: apt-daily-upgrade systemd timer and service directory for drop-ins exist
+  file:
+    path: "/etc/systemd/system/apt-daily-upgrade.{{ item }}.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: ['timer', 'service']
+
+- name: Custom APT daily upgrade timer is set
+  template:
+    src: "task-schedule.conf.j2"
+    dest: "/etc/systemd/system/apt-daily-upgrade.timer.d/task-schedule.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: systemd is reloaded
+
+- name: unattended-upgrades is configured
+  template:
+    src: 50unattended-upgrades.j2
+    dest: "/etc/apt/apt.conf.d/50unattended-upgrades"
+    owner: root
+    group: root
+    mode: "0644"
