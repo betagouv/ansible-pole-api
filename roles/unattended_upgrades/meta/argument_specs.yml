@@ -1,0 +1,22 @@
+---
+argument_specs:
+  main:
+    author:
+      - Aurélien Merel
+    version_added: 1.5.0
+    short_description: Installation et configuration de unattended-upgrades
+    options:
+      unattended_upgrades_time_of_day:
+        type: str
+        description: Heure de la journée à laquelle faire tourner les mises à jour automatiques, au format C(HH:MM)
+      unattended_upgrades_random_delay:
+        type: str
+        description: Délai aléatoire maximum ajouté à l'heure de mise à jour (p. ex. C(1h))
+      unattended_upgrades_mail_to:
+        type: str
+        required: true
+        description: L'adresse courriel à laquelle envoyer les notifications de mises à jour automatiques
+      unattended_upgrades_mail_from:
+        type: str
+        required: true
+        description: L'adresse courriel de provenance pour les notifications de mises à jour automatiques
