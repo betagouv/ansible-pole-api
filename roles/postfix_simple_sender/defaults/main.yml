@@ -1,0 +1,4 @@
+---
+postfix_hostname: "{{ inventory_hostname}}.{{ postfix_domain }}"
+postfix_sender_dependent_transport_map: [] # keys in each list dict: pattern, transport
+postfix_sasl_passwd: [] # keys in each list dict: peer, login, password

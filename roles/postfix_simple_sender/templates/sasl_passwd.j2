@@ -1,0 +1,3 @@
+{% for sasl_entry in postfix_sasl_passwd %}
+{{ sasl_entry.peer }} {{ sasl_entry.login }}:{{ sasl_entry.password }}
+{% endfor %}
