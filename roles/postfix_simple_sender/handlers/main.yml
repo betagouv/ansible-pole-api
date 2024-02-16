@@ -1,0 +1,12 @@
+---
+- name: postmaps are refreshed
+  command:
+    cmd: postmap /etc/postfix/{{ item | quote }}
+  loop:
+    - sasl_passwd
+    - sender_dependent_transport
+
+- name: postfix is restarted
+  systemd_service:
+    name: postfix
+    state: restarted

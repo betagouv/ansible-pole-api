@@ -1,0 +1,21 @@
+---
+- name: mailutils is installed
+  apt:
+    pkg: mailutils
+
+- name: Postfix's configuration files are installed
+  template:
+    src: "{{ item.src | default(item.dest ~ '.j2') }}"
+    dest: "/etc/postfix/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode | default('0600') }}"
+  loop:
+    - { dest: main.cf, mode: "0644" }
+    - { dest: sasl_passwd }
+    - { dest: sender_dependent_transport }
+  loop_control:
+    label: "/etc/postfix/{{ item.dest }}"
+  notify:
+    - postmaps are refreshed
+    - postfix is restarted

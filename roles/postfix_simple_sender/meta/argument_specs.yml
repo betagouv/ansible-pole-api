@@ -1,0 +1,29 @@
+---
+argument_specs:
+  main:
+    author:
+      - Aurélien Merel
+    version_added: 1.6.0
+    short_description: Installation et configuration de Postfix pour seulement envoyer des courriels depuis la machine.
+    description:
+      - Ce rôle installe et configure Postfix à travers le paquet C(mailutils).
+      - Il se limite à l'envoi de message depuis la machine locale, donc Postfix n'écoute que sur l'interface locale.
+      - Ce rôle est minimal à configurer et permet une mise en place rapide lorsqu'un système doit pouvoir envoyer des notifications par courriel.
+    options:
+      postfix_hostname:
+        type: str
+        description: "Paramètre C(myhostname) de Postfix : nom d'hôte de la machine pour Postfix."
+      postfix_domain:
+        type: str
+        required: true
+        description: "Paramètre C(mydomain) de Postfix : nom de domaine de la machine pour Postfix."
+      postfix_sender_dependent_transport_map:
+        type: list
+        description:
+          - "Liste de dictionnaire(s) définissant une table de transport en fonction de l'adresse d'envoi."
+          - "Chaque dictionnaire doit contenir les clés C(pattern) (motif d'adresse d'envoi) et C(transport) (spécification d'un transport pour les adresses qui correspondent au motif, par exemple un serveur SMTP distant)."
+      postfix_sasl_passwd:
+        type: list
+        description:
+          - "Liste de dictionnaire(s) spécifiant les identifiants et mots de passe pour se connecter aux relais SMTP spécifiés dans C(postfix_sender_dependent_transport_map)."
+          - "Chaque dictionnaire doit contenir les clés C(peer) (l'hôte et port distants), C(login) et C(password) (identifiant et mot de passe pour s'authentifier auprès de l'hôte)."

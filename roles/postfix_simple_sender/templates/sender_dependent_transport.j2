@@ -1,0 +1,3 @@
+{% for transport_entry in postfix_sender_dependent_transport_map %}
+{{  transport_entry.pattern }} {{ transport_entry.transport }}
+{% endfor %}
