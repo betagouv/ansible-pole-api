@@ -14,13 +14,28 @@ argument_specs:
         required: true
         description:
           - Liste des comptes devant être dans le groupe.
-          - Les comptes présents sur le système mais non configurés dans cette liste seront supprimés.
+          - Les comptes présents sur le système mais non configurés dans cette liste seront supprimés si C(managed_users_remove_unwanted) est à C(true). Chaque dictionnaire contient les éléments suivants.
+          - 'C(login) (requis) : identifiant sur le système'
+          - 'C(authorized_keys) (requis) : clé(s) publique(s) SSH'
+          - 'C(exclusive_keys) : les clés SSH spécifiées sont-elles exclusives'
+          - 'C(shell) : interpréteur de commande (si non spécifié, C(managed_users_default_shell) est utilisé)'
+          - 'C(home) : répertoire personnel (sinon spécifié un sous-répertoire nommé après C(login) est créé sous C(managed_users_home_base_dir))'
+          - 'C(password) : mot de passe initial'
       managed_users_home_base_dir:
         type: str
         description: Répertoire de base sous lequel créer les répertoires personnels
       managed_users_can_sudo:
         type: bool
-        description: 'Le groupe doit-il être présent dans /etc/sudoers ?'
+        description: 'Le groupe doit-il être présent dans C(/etc/sudoers) ?'
       managed_users_can_sudo_nopasswd:
         type: bool
-        description: 'Si le group a accès sudo, est-ce sans mot de passe ?'
+        description: 'Si le groupe a accès sudo, est-ce sans mot de passe ?'
+      managed_users_remove_unwanted:
+        type: bool
+        description: "Si le groupe présent sur le système contient des comptes non listés dans Ansible, faut-il les supprimer du système ?"
+      managed_users_default_shell:
+        type: str
+        description: "Interpréteur de commandes par défaut pour les comptes où ce n'est pas spécifié explicitement dans C(managed_users)"
+      managed_users_require_password_change:
+        type: bool
+        description: "Pour les comptes qui ont un mot de passe spécifié, faut-il requérir que ce mots de passent soient changés à la prochaine connxion ?"
