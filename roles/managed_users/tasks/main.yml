@@ -23,7 +23,7 @@
     _current_managed_users: "{{ getent_group[managed_users_group][2] | default('') | split (',') | difference(['']) }}"
     _wanted_managed_users: "{{ managed_users | map(attribute='login') }}"
 - set_fact:
-    _unwanted_managed_users: "{{ _current_managed_users | difference(_wanted_managed_users) }}"
+    _unwanted_managed_users: "{{ managed_users_remove_unwanted | ternary(_current_managed_users | difference(_wanted_managed_users), []) }}"
 
 - name: Managed users accounts exist
   user:
@@ -31,17 +31,33 @@
     groups: "{{ [managed_users_group] + (item.additional_groups | default([])) }}"
     append: false
     home: "{{ item.home | default(managed_users_home_base_dir ~ '/' ~ item.login) }}"
-    shell: "{{ item.shell | default('/bin/sh') }}"
-    password: "{{ item.password_hash | default(omit) }}"
-    update_password: on_create
-    state: present
+    shell: "{{ item.shell | default(managed_users_default_shell) }}"
   loop: "{{ managed_users }}"
+
+- name: Shadow content is known
+  getent:
+    database: shadow
+  check_mode: no
+  no_log: true
+
+- name: Account passwords are set if defined in Ansible and not already set on system
+  user:
+    name: "{{ item.login }}"
+    password: "{{ item.password | password_hash('sha512') }}"
+  loop: "{{ managed_users }}"
+  when: "'password' in item and getent_shadow[item.login][0] == '!'"
+
+- name: Users with newly set password are required to change it at next login
+  command:
+    cmd: chage -d 0 "{{ item.login }}"
+  loop: "{{ managed_users }}"
+  when: "'password' in item and getent_shadow[item.login][0] == '!' and managed_users_require_password_change"
 
 - name: SSH keys are exclusively present for managed users
   authorized_key:
     user: "{{ item.login }}"
     key: "{{ item.authorized_keys | default('') }}"
-    exclusive: yes
+    exclusive: "{{ item.exclusive_keys | default(True) }}"
   loop: "{{ managed_users }}"
 
 - name: Managed users can read their home directory

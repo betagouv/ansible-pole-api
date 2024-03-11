@@ -3,3 +3,6 @@ managed_users_group: sudo
 managed_users_can_sudo: true
 managed_users_can_sudo_nopasswd: false
 managed_users_home_base_dir: /home
+managed_users_default_shell: /bin/sh
+managed_users_require_password_change: true
+managed_users_remove_unwanted: true
