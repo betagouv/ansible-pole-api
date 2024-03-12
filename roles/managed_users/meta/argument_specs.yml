@@ -39,3 +39,6 @@ argument_specs:
       managed_users_require_password_change:
         type: bool
         description: "Pour les comptes qui ont un mot de passe spécifié, faut-il requérir que ce mots de passent soient changés à la prochaine connxion ?"
+      managed_users_unsafe_output:
+        type: bool
+        description: "Faut-il afficher la sortie des commandes itérant sur les comptes système ? Par défaut la sortie de ces tâches est cachée avec C(no_log) car cela affiche autrement le mot de passe en clair pour les comptes en ayant un."

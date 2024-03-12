@@ -33,6 +33,7 @@
     home: "{{ item.home | default(managed_users_home_base_dir ~ '/' ~ item.login) }}"
     shell: "{{ item.shell | default(managed_users_default_shell) }}"
   loop: "{{ managed_users }}"
+  no_log: "{{ (not managed_users_unsafe_output) | bool }}"
 
 - name: Shadow content is known
   getent:
@@ -45,12 +46,14 @@
     name: "{{ item.login }}"
     password: "{{ item.password | password_hash('sha512') }}"
   loop: "{{ managed_users }}"
+  no_log: "{{ (not managed_users_unsafe_output) | bool }}"
   when: "'password' in item and getent_shadow[item.login][0] == '!'"
 
 - name: Users with newly set password are required to change it at next login
   command:
     cmd: chage -d 0 "{{ item.login }}"
   loop: "{{ managed_users }}"
+  no_log: "{{ (not managed_users_unsafe_output) | bool }}"
   when: "'password' in item and getent_shadow[item.login][0] == '!' and managed_users_require_password_change"
 
 - name: SSH keys are exclusively present for managed users
@@ -59,6 +62,7 @@
     key: "{{ item.authorized_keys | default('') }}"
     exclusive: "{{ item.exclusive_keys | default(True) }}"
   loop: "{{ managed_users }}"
+  no_log: "{{ (not managed_users_unsafe_output) | bool }}"
 
 - name: Managed users can read their home directory
   file:
@@ -67,6 +71,7 @@
     mode: "u+rX"
     recurse: no
   loop: "{{ managed_users }}"
+  no_log: "{{ (not managed_users_unsafe_output) | bool }}"
 
 - name: Managed users can read their .ssh folder and its content
   file:
@@ -75,7 +80,8 @@
     mode: "u+rX"
     recurse: yes
   loop: "{{ managed_users }}"
-  
+  no_log: "{{ (not managed_users_unsafe_output) | bool }}"
+ 
 - name: Current logged in user for Ansible is known
   command:
     cmd: whoami
