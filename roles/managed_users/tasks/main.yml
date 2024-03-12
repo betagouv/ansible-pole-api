@@ -56,7 +56,7 @@
   no_log: "{{ (not managed_users_unsafe_output) | bool }}"
   when: "'password' in item and getent_shadow[item.login][0] == '!' and managed_users_require_password_change"
 
-- name: SSH keys are exclusively present for managed users
+- name: SSH keys are present for managed users
   authorized_key:
     user: "{{ item.login }}"
     key: "{{ item.authorized_keys | default('') }}"
