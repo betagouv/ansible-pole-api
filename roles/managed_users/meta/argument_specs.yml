@@ -20,6 +20,9 @@ argument_specs:
           - 'C(exclusive_keys) : les clés SSH spécifiées sont-elles exclusives'
           - 'C(shell) : interpréteur de commande (si non spécifié, C(managed_users_default_shell) est utilisé)'
           - 'C(home) : répertoire personnel (sinon spécifié un sous-répertoire nommé après C(login) est créé sous C(managed_users_home_base_dir))'
+          - "C(home_owner) : si le répertoire personnel doit appartenir à quelqu'un d'autre, spécifier avec cette clé"
+          - "C(home_group) : si le répertoire personnel doit appartenir à un autre groupe, spécifier avec cette clé"
+          - "C(home_mode) : si le répertoire personnel doit avoir des permissions différentes de celles par défaut, spécifier avec cette clé"
           - 'C(password) : mot de passe initial'
       managed_users_home_base_dir:
         type: str
