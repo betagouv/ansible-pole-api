@@ -12,11 +12,9 @@ argument_specs:
         type: list
         elements: dict
         description: 'Chaque élement de la liste décrit une partition chiffrée. Clés : C(device) est le périphérique dans C(/dev), C(name) un nom de votre choix pour cette partition et C(passphrase) la phrase de passe de (dé)chiffrement.'
-        required: true
       encrypted_services_data:
         type: list
         elements: dict
-        required: true
         description:
           - Définit des unités systemd dont le démarrage est bloqué tant que des répertoires chiffrés ne sont pas montés. Concrètement, les répertoires en question sont attachés avec C(mount --bind) à un répertoire dans un volume chiffré.
           - Chaque élément de la liste contient une clé C(storage) et une clé C(units).
