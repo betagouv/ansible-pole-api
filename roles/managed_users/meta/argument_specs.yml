@@ -33,6 +33,12 @@ argument_specs:
       managed_users_can_sudo_nopasswd:
         type: bool
         description: 'Si le groupe a accès sudo, est-ce sans mot de passe ?'
+      managed_users_sudo_commands:
+        type: str
+        description: 'Commandes autorisées à être utilisées avec C(sudo), suivant la syntaxe de C(/etc/sudoers)'
+      managed_users_sudo_runas:
+        type: str
+        description: 'Utilisateurs desquels on peut prendre les droits avec C(sudo), suivant la syntaxe de C(/etc/sudoers)'
       managed_users_remove_unwanted:
         type: bool
         description: "Si le groupe présent sur le système contient des comptes non listés dans Ansible, faut-il les supprimer du système ?"
