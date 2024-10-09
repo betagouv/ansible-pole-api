@@ -8,8 +8,8 @@
   community.general.sudoers:
     name: ansible-managed-users-{{ managed_users_group }}
     group: "{{ managed_users_group }}"
-    commands: ALL
-    runas: ALL
+    commands: "{{ managed_users_sudo_commands }}"
+    runas: "{{ managed_users_sudo_runas }}"
     state: "{{ managed_users_can_sudo | ternary('present', 'absent') }}"
     nopassword: "{{ managed_users_can_sudo_nopasswd }}"
 
