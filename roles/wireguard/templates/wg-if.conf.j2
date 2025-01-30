@@ -6,7 +6,7 @@ ListenPort = {{ wireguard_listen_port }}
 {% for wgpeer in wireguard_peers %}
 [Peer] # {{ wgpeer.name }}
 PublicKey = {{ wgpeer.public_key }}
-AllowedIPs = {{ wgpeer.ip }}/32
+AllowedIPs = {{ wgpeer.ip }}
 {% if 'remote' in wgpeer %}
 Endpoint = {{ wgpeer.remote }}
 {% endif %}
