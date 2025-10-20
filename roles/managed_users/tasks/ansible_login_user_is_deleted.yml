@@ -15,4 +15,5 @@
   command:
     cmd: whoami
   become: false
+  changed_when: false
   register: _managed_users_whoami_cmd2
